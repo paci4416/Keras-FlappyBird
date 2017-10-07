@@ -2,7 +2,6 @@
 from __future__ import print_function
 
 import argparse
-import skimage as skimage
 from skimage import transform, color, exposure
 from skimage.transform import rotate
 from skimage.viewer import ImageViewer
@@ -14,8 +13,8 @@ import numpy as np
 from collections import deque
 
 import json
-from keras import initializations
-from keras.initializations import normal, identity
+from keras import initializers
+from keras.initializers import normal, identity
 from keras.models import model_from_json
 from keras.models import Sequential
 from keras.layers.core import Dense, Dropout, Activation, Flatten
@@ -71,9 +70,9 @@ def trainNetwork(model,args):
     do_nothing[0] = 1
     x_t, r_0, terminal = game_state.frame_step(do_nothing)
 
-    x_t = skimage.color.rgb2gray(x_t)
-    x_t = skimage.transform.resize(x_t,(80,80))
-    x_t = skimage.exposure.rescale_intensity(x_t,out_range=(0,255))
+    x_t = color.rgb2gray(x_t)
+    x_t = transform.resize(x_t,(80,80))
+    x_t = exposure.rescale_intensity(x_t,out_range=(0,255))
 
     s_t = np.stack((x_t, x_t, x_t, x_t), axis=2)
     #print (s_t.shape)
@@ -121,9 +120,9 @@ def trainNetwork(model,args):
         #run the selected action and observed next state and reward
         x_t1_colored, r_t, terminal = game_state.frame_step(a_t)
 
-        x_t1 = skimage.color.rgb2gray(x_t1_colored)
-        x_t1 = skimage.transform.resize(x_t1,(80,80))
-        x_t1 = skimage.exposure.rescale_intensity(x_t1, out_range=(0, 255))
+        x_t1 = color.rgb2gray(x_t1_colored)
+        x_t1 = transform.resize(x_t1,(80,80))
+        x_t1 = exposure.rescale_intensity(x_t1, out_range=(0, 255))
 
         x_t1 = x_t1.reshape(1, x_t1.shape[0], x_t1.shape[1], 1) #1x80x80x1
         s_t1 = np.append(x_t1, s_t[:, :, :, :3], axis=3)
@@ -172,7 +171,7 @@ def trainNetwork(model,args):
         # save progress every 10000 iterations
         if t % 1000 == 0:
             print("Now we save model")
-            model.save_weights("model.h5", overwrite=True)
+            model.save("model.h5", overwrite=True)
             with open("model.json", "w") as outfile:
                 json.dump(model.to_json(), outfile)
 
